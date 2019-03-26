@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.surroundinsurance.user.service.domain.user.AdditionalInformation;
+import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 
@@ -22,6 +23,8 @@ public interface UserPersistanceAndRetrievalStrategy {
 	 * @return the user
 	 */
 	User createUser(User user, UserSecurityProfile userSecurityProfile);
+	
+	UnsupportedUser createUnsupportedUser(UnsupportedUser unsupportedUser);
 		
 	/**
 	 * Retrieve user.

@@ -21,6 +21,7 @@ import com.surroundinsurance.user.service.controller.dto.UpdateUserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserProfileRS;
 import com.surroundinsurance.user.service.controller.dto.UserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserRS;
+import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
@@ -74,13 +75,22 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 
 		userRequestValidator.validateUser(partnerId, userRQ, userType);
 
-		User user = DtoToDomainTransformer.transformUserDtoToDomain(partnerId, userRQ, userType);
-		UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
+		UserRS userRS = null;
+		if("MA".equals(userRQ.getState())) {
+			User user = DtoToDomainTransformer.transformUserDtoToDomain(partnerId, userRQ, userType);
+			UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
 
-		user = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
+			user = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
 
-		Assert.notNull(user, "User creation failed.");
-		UserRS userRS = new UserRS(user.getId());
+			Assert.notNull(user, "User creation failed.");
+			userRS = new UserRS(user.getId());
+		} else {
+			UnsupportedUser unsupportedUser = DtoToDomainTransformer.transformUserDtoToUnsupportedUser(partnerId, userRQ);
+			unsupportedUser = userPersistanceAndRetrievalStrategy.createUnsupportedUser(unsupportedUser);
+			
+			Assert.notNull(unsupportedUser, "Unsupported User creation failed.");
+			userRS = new UserRS(unsupportedUser.getId());
+		}
 
 		return userRS;
 	}

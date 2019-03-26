@@ -82,40 +82,46 @@ public class UserRequestValidatorImpl implements UserRequestValidator {
 
         validatePartnerId(partnerId);
         validateEmail(userRQ.getEmail());
-        Assert.hasText(userRQ.getFirstName(), "First name is required.");
-        Assert.hasText(userRQ.getLastName(), "Last name is required.");
-        Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), "First name contains invalid characters.");
-        Assert.isTrue(userRQ.getLastName().matches(nameRegularExpression), "Last name contains invalid characters.");
+        Assert.hasText(userRQ.getState(), "State is required.");
         
-        if (StringUtils.hasText(userRQ.getPhone())) {
-            Assert.isTrue(userRQ.getPhone().matches(phoneNumberRegularExpression),
-                    "Phone number has invalid characters.");
-        }
-        
-        if (StringUtils.hasText(userRQ.getDateOfBirth())) {
-            DateUtil.validateDateOfBirth(userRQ.getDateOfBirth());
-        }
-        
-        if (StringUtils.hasText(userRQ.getCountryCode())) {
-            Assert.isTrue(userRQ.getCountryCode().matches(countryCodeRegularExpression),
-                    "Country Code has invalid characters, use ISO format.");
-            validateCountryCode(userRQ.getCountryCode());
-        }
-        
-        if (StringUtils.hasText(userRQ.getTitle())) {
-            Assert.isTrue(userRQ.getTitle().matches(titleRegularExpression), "Invalid title format (Mr. / Mrs. / Ms.)");
-        }
-        
-        if (StringUtils.hasText(userRQ.getPhoneCountryCode())) {
-            Assert.isTrue(userRQ.getPhoneCountryCode().matches(phoneCountryCodeRegularExpression),
-                    "Phone country code is invalid.");
-        }
+        // TODO: update the validations
+        if("MA".equals(userRQ.getState())) {
+        	Assert.hasText(userRQ.getFirstName(), "First name is required.");
+            Assert.hasText(userRQ.getLastName(), "Last name is required.");
+            Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), "First name contains invalid characters.");
+            Assert.isTrue(userRQ.getLastName().matches(nameRegularExpression), "Last name contains invalid characters.");
+            
+            if (StringUtils.hasText(userRQ.getPhone())) {
+                Assert.isTrue(userRQ.getPhone().matches(phoneNumberRegularExpression),
+                        "Phone number has invalid characters.");
+            }
+            
+            if (StringUtils.hasText(userRQ.getDateOfBirth())) {
+                DateUtil.validateDateOfBirth(userRQ.getDateOfBirth());
+            }
+            
+            if (StringUtils.hasText(userRQ.getCountryCode())) {
+                Assert.isTrue(userRQ.getCountryCode().matches(countryCodeRegularExpression),
+                        "Country Code has invalid characters, use ISO format.");
+                validateCountryCode(userRQ.getCountryCode());
+            }
+            
+            if (StringUtils.hasText(userRQ.getTitle())) {
+                Assert.isTrue(userRQ.getTitle().matches(titleRegularExpression), "Invalid title format (Mr. / Mrs. / Ms.)");
+            }
+            
+            if (StringUtils.hasText(userRQ.getPhoneCountryCode())) {
+                Assert.isTrue(userRQ.getPhoneCountryCode().matches(phoneCountryCodeRegularExpression),
+                        "Phone country code is invalid.");
+            }
 
-        if (UserType.ENROLLED.equals(userType)) {
-            validatePassword(userRQ.getPassword());
+            if (UserType.ENROLLED.equals(userType)) {
+                validatePassword(userRQ.getPassword());
+            }
+            
+            validatePhoneCountryCode(userRQ.getCountryCode(), userRQ.getPhoneCountryCode(), userRQ.getPhone());
         }
         
-        validatePhoneCountryCode(userRQ.getCountryCode(), userRQ.getPhoneCountryCode(), userRQ.getPhone());
     }
 
     @Override

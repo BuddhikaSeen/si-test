@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.surroundinsurance.user.service.domain.user.Address;
+import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserProfile;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
@@ -38,6 +39,17 @@ public class DtoToDomainTransformer {
 				additionalInformationList, userRQ.getExternalUserId());
 
 		return user;
+
+	}
+	
+	public static UnsupportedUser transformUserDtoToUnsupportedUser(String partnerId, UserRQ userRQ) {
+
+		if (userRQ == null) {
+			return null;
+		}
+		UnsupportedUser unsupportedUser = new UnsupportedUser(partnerId, userRQ.getEmail(), userRQ.getState());
+
+		return unsupportedUser;
 
 	}
 
