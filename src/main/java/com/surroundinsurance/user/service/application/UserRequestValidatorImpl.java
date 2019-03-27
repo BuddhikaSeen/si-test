@@ -84,13 +84,8 @@ public class UserRequestValidatorImpl implements UserRequestValidator {
         validateEmail(userRQ.getEmail());
         Assert.hasText(userRQ.getState(), "State is required.");
         
-        // TODO: update the validations
+        // TODO: remove all these validations if not needed
         if("MA".equals(userRQ.getState())) {
-//        	Assert.hasText(userRQ.getFirstName(), "First name is required.");
-//            Assert.hasText(userRQ.getLastName(), "Last name is required.");
-//            Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), "First name contains invalid characters.");
-//            Assert.isTrue(userRQ.getLastName().matches(nameRegularExpression), "Last name contains invalid characters.");
-            
             if (StringUtils.hasText(userRQ.getFirstName())) {
             	Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), 
             			"First name contains invalid characters.");
@@ -125,9 +120,10 @@ public class UserRequestValidatorImpl implements UserRequestValidator {
                         "Phone country code is invalid.");
             }
 
-            if (UserType.ENROLLED.equals(userType)) {
-                validatePassword(userRQ.getPassword());
-            }
+            // TODO: remove this since password not required on sign up
+//            if (UserType.ENROLLED.equals(userType)) {
+//                validatePassword(userRQ.getPassword());
+//            }
             
             validatePhoneCountryCode(userRQ.getCountryCode(), userRQ.getPhoneCountryCode(), userRQ.getPhone());
         }
