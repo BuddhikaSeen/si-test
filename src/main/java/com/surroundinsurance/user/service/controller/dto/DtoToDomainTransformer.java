@@ -24,16 +24,19 @@ public class DtoToDomainTransformer {
 			return null;
 		}
 
-		Address address = new Address(userRQ.getAddress1(), userRQ.getAddress2(), userRQ.getState(), userRQ.getCity(),
-				userRQ.getCountryCode(), userRQ.getZipCode());
+//		Address address = new Address(userRQ.getAddress1(), userRQ.getAddress2(), userRQ.getState(), userRQ.getCity(),
+//				userRQ.getCountryCode(), userRQ.getZipCode());
 			
-		UserProfile userProfile = new UserProfile(userRQ.getFirstName(), userRQ.getLastName(), userRQ.getPhone(),
-				address, DateUtil.convertToDate(userRQ.getDateOfBirth()), userRQ.getTitle(), userRQ.getPhoneCountryCode());
+//		UserProfile userProfile = new UserProfile(userRQ.getFirstName(), userRQ.getLastName(), userRQ.getPhone(),
+//				address, DateUtil.convertToDate(userRQ.getDateOfBirth()), userRQ.getTitle(), userRQ.getPhoneCountryCode());
+		UserProfile userProfile = null;
 
-		UserSubsciption userSubsciption = new UserSubsciption(userRQ.isSubscribedToNewsletter());
+//		UserSubsciption userSubsciption = new UserSubsciption(userRQ.isSubscribedToNewsletter());
+		UserSubsciption userSubsciption = null;
 
-		List<com.surroundinsurance.user.service.domain.user.AdditionalInformation> additionalInformationList = constructAdditionalInformation(
-				userRQ.getAdditionalInformation());
+//		List<com.surroundinsurance.user.service.domain.user.AdditionalInformation> additionalInformationList = constructAdditionalInformation(
+//				userRQ.getAdditionalInformation());
+		List<com.surroundinsurance.user.service.domain.user.AdditionalInformation> additionalInformationList = null;
 
 		User user = new User(partnerId, userRQ.getEmail(), userType, userProfile, userSubsciption,
 				additionalInformationList, userRQ.getExternalUserId());

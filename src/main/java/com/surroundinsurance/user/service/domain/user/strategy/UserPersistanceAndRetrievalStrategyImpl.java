@@ -87,16 +87,17 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 	@Override
 	public User createUser(User user, UserSecurityProfile userSecurityProfile) {
 		userValidationStrategy.validateEmail(user.getEmail(), user.getPartnerId());
-		String password = userSecurityProfile.getPassword();
-
-		if (user.isGuestUser()) {
-			password = passwordGenerationStrategy.generatePassword();
-			Assert.hasText(password, "Error while creating user.");
-			userSecurityProfile.setSystemGeneratedPassword(true);
-		}
-
-		String hashedPassword = cryptographyStrategy.hash(password);
-		userSecurityProfile.setPassword(hashedPassword);
+		
+//		String password = userSecurityProfile.getPassword();
+//
+//		if (user.isGuestUser()) {
+//			password = passwordGenerationStrategy.generatePassword();
+//			Assert.hasText(password, "Error while creating user.");
+//			userSecurityProfile.setSystemGeneratedPassword(true);
+//		}
+//
+//		String hashedPassword = cryptographyStrategy.hash(password);
+//		userSecurityProfile.setPassword(hashedPassword);
 
 		boolean verificationEnabled = partnerSpecificationRetrievalStrategy.checkVerificationEnabled(user.getPartnerId());
 
@@ -105,11 +106,11 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 		}
 
 		user = userManagementService.createUser(user);
-		userSecurityProfile.setUserId(user.getId());
-		userSecurityProfileService.createUserSecurityProfile(userSecurityProfile);
+//		userSecurityProfile.setUserId(user.getId());
+//		userSecurityProfileService.createUserSecurityProfile(userSecurityProfile);
 
-		ArchivedPassword passwordHistory = new ArchivedPassword(user.getPartnerId(), user.getId(), hashedPassword);
-		archivedPasswordService.createArchivedPassword(passwordHistory);
+//		ArchivedPassword passwordHistory = new ArchivedPassword(user.getPartnerId(), user.getId(), hashedPassword);
+//		archivedPasswordService.createArchivedPassword(passwordHistory);
 
 		if (verificationEnabled) {
 			verificationStrategy.createVerificationCode(user.getPartnerId(), user.getUserType(), user, userCreatedEventName);

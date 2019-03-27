@@ -83,7 +83,8 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 		UserRS userRS = null;
 		if("MA".equals(userRQ.getState())) {
 			User user = DtoToDomainTransformer.transformUserDtoToDomain(partnerId, userRQ, userType);
-			UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
+//			UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
+			UserSecurityProfile userSecurityProfile = null;
 
 			user = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
 
