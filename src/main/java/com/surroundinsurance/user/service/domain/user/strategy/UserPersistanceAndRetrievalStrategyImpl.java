@@ -15,6 +15,8 @@ import com.surroundinsurance.user.service.domain.partner.strategy.PartnerSpecifi
 import com.surroundinsurance.user.service.domain.user.AdditionalInformation;
 import com.surroundinsurance.user.service.domain.user.ArchivedPassword;
 import com.surroundinsurance.user.service.domain.user.ArchivedPasswordService;
+import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
+import com.surroundinsurance.user.service.domain.user.UnsupportedUserManagementService;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserManagementService;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
@@ -44,10 +46,16 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 	/** The user validation strategy. */
 	@Autowired
 	private UserValidationStrategy userValidationStrategy;
+	
+	@Autowired
+	private UnsupportedUserValidationStrategy unsupportedUserValidationStrategy;
 
 	/** The user management service. */
 	@Autowired
 	private UserManagementService userManagementService;
+	
+	@Autowired
+	private UnsupportedUserManagementService unsupportedUserManagementService;
 	
 	/** The user security profile service. */
 	@Autowired

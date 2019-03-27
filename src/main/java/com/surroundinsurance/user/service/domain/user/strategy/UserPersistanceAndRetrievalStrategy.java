@@ -1,7 +1,6 @@
 package com.surroundinsurance.user.service.domain.user.strategy;
 
 import java.util.List;
-import java.util.Map;
 
 import com.surroundinsurance.user.service.domain.user.AdditionalInformation;
 import com.surroundinsurance.user.service.domain.user.User;

@@ -21,12 +21,15 @@ import com.surroundinsurance.user.service.controller.dto.UpdateUserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserProfileRS;
 import com.surroundinsurance.user.service.controller.dto.UserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserRS;
+import com.surroundinsurance.user.service.controller.dto.UserStateType;
+import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
 import com.surroundinsurance.user.service.domain.user.strategy.CredentialRecoveryStrategy;
+import com.surroundinsurance.user.service.domain.user.strategy.UnsupportedUserPersistanceAndRetrievalStrategy;
 import com.surroundinsurance.user.service.domain.user.strategy.UserAuthenticationStrategy;
 import com.surroundinsurance.user.service.domain.user.strategy.UserPersistanceAndRetrievalStrategy;
 import com.surroundinsurance.user.service.domain.user.strategy.VerificationStrategy;
@@ -48,6 +51,9 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 	/** The user persistance and retrieval strategy. */
 	@Autowired
 	private UserPersistanceAndRetrievalStrategy userPersistanceAndRetrievalStrategy;
+	
+	@Autowired
+	private UnsupportedUserPersistanceAndRetrievalStrategy unsupportedUserPersistanceAndRetrievalStrategy;
 	
 	/** The verification strategy. */
 	@Autowired
@@ -74,13 +80,22 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 
 		userRequestValidator.validateUser(partnerId, userRQ, userType);
 
-		User user = DtoToDomainTransformer.transformUserDtoToDomain(partnerId, userRQ, userType);
-		UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
+		UserRS userRS = null;
+		if("MA".equals(userRQ.getState())) {
+			User user = DtoToDomainTransformer.transformUserDtoToDomain(partnerId, userRQ, userType);
+			UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
 
-		user = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
+			user = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
 
-		Assert.notNull(user, "User creation failed.");
-		UserRS userRS = new UserRS(user.getId());
+			Assert.notNull(user, "User creation failed.");
+			userRS = new UserRS(user.getId(), UserStateType.IN_STATE);
+		} else {
+			UnsupportedUser unsupportedUser = DtoToDomainTransformer.transformUserDtoToUnsupportedUser(partnerId, userRQ);
+			unsupportedUser = unsupportedUserPersistanceAndRetrievalStrategy.createUnsupportedUser(unsupportedUser);
+			
+			Assert.notNull(unsupportedUser, "Unsupported User creation failed.");
+			userRS = new UserRS(unsupportedUser.getId(), UserStateType.OUT_OF_STATE);
+		}
 
 		return userRS;
 	}
