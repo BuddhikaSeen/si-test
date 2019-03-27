@@ -29,6 +29,15 @@ public class UnsupportedUserManagementServiceImpl implements UnsupportedUserMana
 	}
 	
 	@Override
+	public UnsupportedUser updateUnsupportedUser(UnsupportedUser unsupportedUser) {
+
+		Date createdDate = new Date();
+		unsupportedUser.setModifiedDate(createdDate);
+		
+		return unsupportedUserRepository.save(unsupportedUser);
+	}
+	
+	@Override
 	public UnsupportedUser retrieveUserByEmail(String partnerId, String email) {
 		return unsupportedUserRepository.findByEmailAndPartnerId(email.toLowerCase(), partnerId);
 	}

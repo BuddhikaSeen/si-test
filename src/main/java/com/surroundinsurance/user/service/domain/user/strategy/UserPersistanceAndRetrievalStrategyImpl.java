@@ -119,15 +119,6 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 	}
 	
 	@Override
-	public UnsupportedUser createUnsupportedUser(UnsupportedUser unsupportedUser) {
-		unsupportedUserValidationStrategy.validateEmail(unsupportedUser.getEmail(), unsupportedUser.getPartnerId());
-
-		unsupportedUser = unsupportedUserManagementService.createUnsupportedUser(unsupportedUser);
-
-		return unsupportedUser;
-	}
-	
-	@Override
 	public User retrieveUser(String partnerId, String userId, boolean enableThrowException) {
 		User existingUser = userManagementService.retrieveUser(partnerId, userId);
 				

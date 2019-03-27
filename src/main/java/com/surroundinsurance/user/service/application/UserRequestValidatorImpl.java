@@ -86,10 +86,20 @@ public class UserRequestValidatorImpl implements UserRequestValidator {
         
         // TODO: update the validations
         if("MA".equals(userRQ.getState())) {
-        	Assert.hasText(userRQ.getFirstName(), "First name is required.");
-            Assert.hasText(userRQ.getLastName(), "Last name is required.");
-            Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), "First name contains invalid characters.");
-            Assert.isTrue(userRQ.getLastName().matches(nameRegularExpression), "Last name contains invalid characters.");
+//        	Assert.hasText(userRQ.getFirstName(), "First name is required.");
+//            Assert.hasText(userRQ.getLastName(), "Last name is required.");
+//            Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), "First name contains invalid characters.");
+//            Assert.isTrue(userRQ.getLastName().matches(nameRegularExpression), "Last name contains invalid characters.");
+            
+            if (StringUtils.hasText(userRQ.getFirstName())) {
+            	Assert.isTrue(userRQ.getFirstName().matches(nameRegularExpression), 
+            			"First name contains invalid characters.");
+            }
+            
+            if (StringUtils.hasText(userRQ.getLastName())) {
+            	Assert.isTrue(userRQ.getLastName().matches(nameRegularExpression), 
+            			"Last name contains invalid characters.");
+            }
             
             if (StringUtils.hasText(userRQ.getPhone())) {
                 Assert.isTrue(userRQ.getPhone().matches(phoneNumberRegularExpression),
