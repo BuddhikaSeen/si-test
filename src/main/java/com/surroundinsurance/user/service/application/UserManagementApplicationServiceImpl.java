@@ -25,7 +25,9 @@ import com.surroundinsurance.user.service.controller.dto.UserStateType;
 import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
+import com.surroundinsurance.user.service.domain.user.UserDetails;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
+import com.surroundinsurance.user.service.domain.user.UserStatus;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
 import com.surroundinsurance.user.service.domain.user.strategy.CredentialRecoveryStrategy;
@@ -86,10 +88,14 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 //			UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, userRQ);
 			UserSecurityProfile userSecurityProfile = null;
 
-			user = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
+			UserDetails userDetails = userPersistanceAndRetrievalStrategy.createUser(user, userSecurityProfile);
 
 			Assert.notNull(user, "User creation failed.");
-			userRS = new UserRS(user.getId(), UserStateType.IN_STATE);
+			
+			boolean isVerified = UserStatus.PENDING_VERIFICATION.equals(userDetails.getUser().getUserStatus()) ? false : true;
+			
+			userRS = new UserRS(userDetails.getUser().getId(), UserStateType.IN_STATE, 
+					userDetails.isNewUser(), isVerified, userDetails.getVerificationCode());
 		} else {
 			UnsupportedUser unsupportedUser = DtoToDomainTransformer.transformUserDtoToUnsupportedUser(partnerId, userRQ);
 			unsupportedUser = unsupportedUserPersistanceAndRetrievalStrategy.createUnsupportedUser(unsupportedUser);
