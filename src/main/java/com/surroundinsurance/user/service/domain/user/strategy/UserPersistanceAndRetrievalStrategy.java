@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.surroundinsurance.user.service.domain.user.AdditionalInformation;
 import com.surroundinsurance.user.service.domain.user.User;
+import com.surroundinsurance.user.service.domain.user.UserDetails;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 
 /**
@@ -20,7 +21,7 @@ public interface UserPersistanceAndRetrievalStrategy {
 	 * @param userSecurityProfile the user security profile
 	 * @return the user
 	 */
-	User createUser(User user, UserSecurityProfile userSecurityProfile);
+	UserDetails createUser(User user, UserSecurityProfile userSecurityProfile);
 		
 	/**
 	 * Retrieve user.

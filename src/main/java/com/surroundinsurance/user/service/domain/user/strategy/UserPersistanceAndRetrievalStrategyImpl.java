@@ -18,10 +18,12 @@ import com.surroundinsurance.user.service.domain.user.ArchivedPasswordService;
 import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.UnsupportedUserManagementService;
 import com.surroundinsurance.user.service.domain.user.User;
+import com.surroundinsurance.user.service.domain.user.UserDetails;
 import com.surroundinsurance.user.service.domain.user.UserManagementService;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfileService;
 import com.surroundinsurance.user.service.domain.user.UserType;
+import com.surroundinsurance.user.service.domain.user.VerificationCode;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
 
 /**
@@ -85,38 +87,45 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 	private String userEmailUpdatedEventName;
 
 	@Override
-	public User createUser(User user, UserSecurityProfile userSecurityProfile) {
-		userValidationStrategy.validateEmail(user.getEmail(), user.getPartnerId());
+	public UserDetails createUser(User user, UserSecurityProfile userSecurityProfile) {
+		UserDetails userDetails = null;
+		User existingUser = userValidationStrategy.validateEmail(user.getEmail(), user.getPartnerId());
 		
-//		String password = userSecurityProfile.getPassword();
+		if (existingUser == null) {
+//			String password = userSecurityProfile.getPassword();
 //
-//		if (user.isGuestUser()) {
-//			password = passwordGenerationStrategy.generatePassword();
-//			Assert.hasText(password, "Error while creating user.");
-//			userSecurityProfile.setSystemGeneratedPassword(true);
-//		}
+//			if (user.isGuestUser()) {
+//				password = passwordGenerationStrategy.generatePassword();
+//				Assert.hasText(password, "Error while creating user.");
+//				userSecurityProfile.setSystemGeneratedPassword(true);
+//			}
 //
-//		String hashedPassword = cryptographyStrategy.hash(password);
-//		userSecurityProfile.setPassword(hashedPassword);
+//			String hashedPassword = cryptographyStrategy.hash(password);
+//			userSecurityProfile.setPassword(hashedPassword);
 
-		boolean verificationEnabled = partnerSpecificationRetrievalStrategy.checkVerificationEnabled(user.getPartnerId());
+			boolean verificationEnabled = partnerSpecificationRetrievalStrategy.checkVerificationEnabled(user.getPartnerId());
 
-		if (!verificationEnabled) {
-			user.markAsVerified();
+			if (!verificationEnabled) {
+				user.markAsVerified();
+			}
+
+			user = userManagementService.createUser(user);
+//			userSecurityProfile.setUserId(user.getId());
+//			userSecurityProfileService.createUserSecurityProfile(userSecurityProfile);
+
+//			ArchivedPassword passwordHistory = new ArchivedPassword(user.getPartnerId(), user.getId(), hashedPassword);
+//			archivedPasswordService.createArchivedPassword(passwordHistory);
+
+			if (verificationEnabled) {
+				VerificationCode verificationCode = verificationStrategy.createVerificationCode(user.getPartnerId(), user.getUserType(), user, userCreatedEventName);
+				userDetails = new UserDetails(user, true, verificationCode.getCode());
+			} else {
+				userDetails = new UserDetails(user, true);
+			}
+		} else {
+			userDetails = new UserDetails(existingUser, false);
 		}
-
-		user = userManagementService.createUser(user);
-//		userSecurityProfile.setUserId(user.getId());
-//		userSecurityProfileService.createUserSecurityProfile(userSecurityProfile);
-
-//		ArchivedPassword passwordHistory = new ArchivedPassword(user.getPartnerId(), user.getId(), hashedPassword);
-//		archivedPasswordService.createArchivedPassword(passwordHistory);
-
-		if (verificationEnabled) {
-			verificationStrategy.createVerificationCode(user.getPartnerId(), user.getUserType(), user, userCreatedEventName);
-		}
-
-		return user;
+		return userDetails;
 	}
 	
 	@Override

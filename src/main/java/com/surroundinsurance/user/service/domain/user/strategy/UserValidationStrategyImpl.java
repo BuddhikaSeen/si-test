@@ -21,7 +21,7 @@ public class UserValidationStrategyImpl implements UserValidationStrategy {
 	public User validateEmail(String email, String partnerId) {
 
 		User userExistingUser = userManagementService.retrieveUserByEmail(partnerId, email);
-		Assert.isNull(userExistingUser, "Email already exist.");
+//		Assert.isNull(userExistingUser, "Email already exist.");
 		
 		return userExistingUser;
 
