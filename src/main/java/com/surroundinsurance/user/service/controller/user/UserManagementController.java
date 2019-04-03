@@ -46,6 +46,7 @@ import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.exception.AccessDeniedException;
 import com.surroundinsurance.user.service.domain.user.exception.PartnerInvalidException;
 import com.surroundinsurance.user.service.domain.user.exception.PartnerNotFoundException;
+import com.surroundinsurance.user.service.domain.user.exception.VerificationCodeExpiredException;
 import com.surroundinsurance.user.service.platform.common.HTTPResponseHandler;
 import com.surroundinsurance.user.service.platform.common.LoggingUtil;
 import com.surroundinsurance.user.service.platform.common.RequestMappings;
@@ -242,6 +243,19 @@ public class UserManagementController extends HTTPResponseHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public void handleIllegalArgumentException(HttpServletResponse response, IllegalArgumentException exception) {
 	    LoggingUtil.logExceptionHandler(logger, "Illegal Argument Error : " + HttpStatus.BAD_REQUEST.value(), exception);
+		setStatusHeaders(response, HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
+				exception.getMessage());
+	}
+	
+	/**
+	 * Handle verification code expired exception.
+	 *
+	 * @param response the response
+	 * @param exception the exception
+	 */
+	@ExceptionHandler(VerificationCodeExpiredException.class)
+	public void handleVerificationCodeExpiredException(HttpServletResponse response, VerificationCodeExpiredException exception) {
+	    LoggingUtil.logExceptionHandler(logger, "Verification Code Expired Error : " + HttpStatus.BAD_REQUEST.value(), exception);
 		setStatusHeaders(response, HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
 				exception.getMessage());
 	}

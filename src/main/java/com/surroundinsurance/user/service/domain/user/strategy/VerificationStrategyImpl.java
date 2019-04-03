@@ -1,5 +1,7 @@
 package com.surroundinsurance.user.service.domain.user.strategy;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ import com.surroundinsurance.user.service.domain.user.VerificationCodeGeneration
 import com.surroundinsurance.user.service.domain.user.VerificationService;
 import com.surroundinsurance.user.service.domain.user.VerificationStatus;
 import com.surroundinsurance.user.service.domain.user.VerificationType;
+import com.surroundinsurance.user.service.domain.user.exception.VerificationCodeExpiredException;
 import com.surroundinsurance.user.service.infrastructure.service.EventPublisherGatewayService;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
 
@@ -62,6 +65,9 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	/** The verification channel type. */
 	@Value("${user.service.user.verification.channel.type:EMAIL}")
 	private String verificationChannelType;
+	
+	@Value("${user.service.user.verification.code.expire.time}")
+	private int userVerificationCodeExpireTime;
 		
 	@Override
 	public VerificationCode createVerificationCode(String partnerId, UserType userType, User user, String eventName) {
@@ -94,6 +100,8 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		Assert.notNull(verificationCode, "Invalid verification code");
 		Assert.isTrue(!VerificationStatus.EXPIRED.equals(verificationCode.getVerificationStatus()), "The verification code has expired");
 		
+		validateVerificationCodeExpiry(verificationCode);
+		
 		User user = userManagementService.retrieveUser(verificationCode.getPartnerId(), verificationCode.getUserId());
 		
 		Assert.notNull(user, "User not found");
@@ -101,6 +109,20 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		userManagementService.updateUser(user);
 		
 		expireVerificationCode(verificationCode);
+	}
+	
+	private void validateVerificationCodeExpiry(VerificationCode verificationCode) {
+		Calendar expireTime = Calendar.getInstance();
+		expireTime.setTime(verificationCode.getCreatedDate());
+		expireTime.add(Calendar.MINUTE, userVerificationCodeExpireTime);
+		Date expiryDate = expireTime.getTime();
+		Date currentDate = new Date();
+
+		if (currentDate.after(expiryDate)) {
+			expireVerificationCode(verificationCode);
+			throw new VerificationCodeExpiredException("User verification code is expired.");
+		}
+
 	}
 
 	public void expireVerificationCode(VerificationCode verificationCode) {
