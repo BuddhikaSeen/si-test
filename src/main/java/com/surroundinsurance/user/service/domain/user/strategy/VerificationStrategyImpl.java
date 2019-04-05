@@ -1,5 +1,7 @@
 package com.surroundinsurance.user.service.domain.user.strategy;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ import com.surroundinsurance.user.service.domain.user.VerificationCodeGeneration
 import com.surroundinsurance.user.service.domain.user.VerificationService;
 import com.surroundinsurance.user.service.domain.user.VerificationStatus;
 import com.surroundinsurance.user.service.domain.user.VerificationType;
+import com.surroundinsurance.user.service.domain.user.exception.VerificationCodeExpiredException;
 import com.surroundinsurance.user.service.infrastructure.service.EventPublisherGatewayService;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
 
@@ -62,6 +65,12 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	/** The verification channel type. */
 	@Value("${user.service.user.verification.channel.type:EMAIL}")
 	private String verificationChannelType;
+	
+	@Value("${user.service.user.verification.code.expire.time}")
+	private int userVerificationCodeExpireTime;
+	
+	@Value("${user.service.user.onetime.password.verification.code.expire.time}")
+	private int oneTimePasswordVerificationCodeExpireTime;
 		
 	@Override
 	public VerificationCode createVerificationCode(String partnerId, UserType userType, User user, String eventName) {
@@ -85,6 +94,41 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		
 		return verificationCode;
 	}
+	
+	@Override
+	public VerificationCode createOneTimePassword(String partnerId, UserType userType, User user, String eventName) {
+
+		String code = verificationCodeGenerationStrategy.generateVerificationCode(VerificationCodeGenerationType.valueOf(verificationCodeGenerationType));
+		
+		VerificationCode verificationCode = new VerificationCode(user.getId(), partnerId, code,
+				VerificationType.ONE_TIME_PASSWORD, VerificationChannelType.valueOf(verificationChannelType));
+		verificationCode = verificationService.createVerificationCode(verificationCode);
+
+//		String verificationUrl = emailVerificationUrl + verificationCode.getCode();
+//		
+//		if (emailNotificationEnabled) {
+//			Map<String, String> notificationEventParams = constructVerificationEventDetails(partnerId, user, userType,
+//					verificationUrl, eventName);
+//
+//			eventPublisherGatewayService.publishEvent(notificationEventParams);
+//		}
+//
+//		logger.debug("Email verification url : " + verificationUrl);
+		
+		return verificationCode;
+	}
+	
+	@Override
+	public VerificationCode validateOneTimePasswordVerificationCode(String partnerId, String code) {
+		VerificationCode verificationCode = verificationService.retrieveVerificationCode(partnerId, code, VerificationType.ONE_TIME_PASSWORD);
+		
+		Assert.notNull(verificationCode, "Invalid one time password verification code.");
+		Assert.isTrue(!VerificationStatus.EXPIRED.equals(verificationCode.getVerificationStatus()), "One time password verification code is expired.");
+		
+		validateOneTimePasswordVerificationCodeExpiry(verificationCode);
+		
+		return verificationCode;
+	}
 		
 	@Override
 	public void verifyCode(String partnerId, String code) {
@@ -94,6 +138,8 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		Assert.notNull(verificationCode, "Invalid verification code");
 		Assert.isTrue(!VerificationStatus.EXPIRED.equals(verificationCode.getVerificationStatus()), "The verification code has expired");
 		
+		validateVerificationCodeExpiry(verificationCode);
+		
 		User user = userManagementService.retrieveUser(verificationCode.getPartnerId(), verificationCode.getUserId());
 		
 		Assert.notNull(user, "User not found");
@@ -102,10 +148,38 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		
 		expireVerificationCode(verificationCode);
 	}
+	
+	private void validateVerificationCodeExpiry(VerificationCode verificationCode) {
+		Calendar expireTime = Calendar.getInstance();
+		expireTime.setTime(verificationCode.getCreatedDate());
+		expireTime.add(Calendar.MINUTE, userVerificationCodeExpireTime);
+		Date expiryDate = expireTime.getTime();
+		Date currentDate = new Date();
+
+		if (currentDate.after(expiryDate)) {
+			expireVerificationCode(verificationCode);
+			throw new VerificationCodeExpiredException("User verification code is expired.");
+		}
+
+	}
 
 	public void expireVerificationCode(VerificationCode verificationCode) {
 		verificationCode.markAsExpired();
 		verificationService.updateVerificationCode(verificationCode);
+	}
+	
+	private void validateOneTimePasswordVerificationCodeExpiry(VerificationCode verificationCode) {
+		Calendar expireTime = Calendar.getInstance();
+		expireTime.setTime(verificationCode.getCreatedDate());
+		expireTime.add(Calendar.MINUTE, oneTimePasswordVerificationCodeExpireTime);
+		Date expiryDate = expireTime.getTime();
+		Date currentDate = new Date();
+
+		if (currentDate.after(expiryDate)) {
+			expireVerificationCode(verificationCode);
+			throw new VerificationCodeExpiredException("One time password verification code is expired.");
+		}
+
 	}
 	
 	/**

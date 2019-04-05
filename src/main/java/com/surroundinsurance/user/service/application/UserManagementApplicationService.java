@@ -1,7 +1,9 @@
 package com.surroundinsurance.user.service.application;
 
+import com.surroundinsurance.user.service.controller.dto.CreatePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ForgotPasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ForgotPasswordVerificationCode;
+import com.surroundinsurance.user.service.controller.dto.OneTimePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ResendVerificationRQ;
 import com.surroundinsurance.user.service.controller.dto.ResetPasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.RetrieveEmailRQ;
@@ -10,6 +12,7 @@ import com.surroundinsurance.user.service.controller.dto.UpdateUserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserProfileRS;
 import com.surroundinsurance.user.service.controller.dto.UserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserRS;
+import com.surroundinsurance.user.service.controller.dto.UserVerificationCode;
 import com.surroundinsurance.user.service.domain.user.UserType;
 
 /**
@@ -93,7 +96,7 @@ public interface UserManagementApplicationService {
 	 * @param partnerId the partner id
 	 * @param resendVerificationRQ the resend verification rq
 	 */
-	void resendVerification(String partnerId, ResendVerificationRQ resendVerificationRQ);
+	UserVerificationCode resendVerification(String partnerId, ResendVerificationRQ resendVerificationRQ);
 
 	/**
 	 * Retrieve user by token.
@@ -103,5 +106,11 @@ public interface UserManagementApplicationService {
 	 * @return the user profile rs
 	 */
 	UserProfileRS retrieveUserByToken(String partnerId, String userAuthenticationTokenValue);
+	
+	UserVerificationCode sendOneTimePassword(String partnerId, OneTimePasswordRQ oneTimePasswordRQ);
+	
+	UserVerificationCode verifyOneTimemPasswordCode(String partnerId, String code);
+	
+	void createPassword(String partnerId, CreatePasswordRQ resetPasswordRQ);
 
 }

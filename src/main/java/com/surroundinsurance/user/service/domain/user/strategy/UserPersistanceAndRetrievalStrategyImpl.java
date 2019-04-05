@@ -234,6 +234,37 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 		userSecurityProfileService.updateUserSecurityProfile(userSecurityProfile);
 	}
 	
+	@Override
+	public void createPassword(User user, UserSecurityProfile userSecurityProfile) {
+		String password = userSecurityProfile.getPassword();
+		
+		String hashedPassword = cryptographyStrategy.hash(password);
+		userSecurityProfile.setPassword(hashedPassword);
+		
+		userSecurityProfile.setUserId(user.getId());
+		userSecurityProfileService.createUserSecurityProfile(userSecurityProfile);
+		
+		ArchivedPassword passwordHistory = new ArchivedPassword(user.getPartnerId(), user.getId(), hashedPassword);
+		archivedPasswordService.createArchivedPassword(passwordHistory);
+		
+		if(!user.isVerified()) {
+			user.markAsVerified();
+			userManagementService.updateUser(user);
+		}
+	}
+	
+	@Override
+	public void isUserSecurityProfileExists(String partnerId, String userId) {
+		UserSecurityProfile existingUserSecurityProfile = userSecurityProfileService
+				.retrieveUserSecurityProfile(partnerId, userId);
+
+		if (existingUserSecurityProfile != null) {
+
+			logger.info("User security profile already exists for userId : " + userId);
+			throw new IllegalArgumentException("Password already created.");
+		}
+	}
+	
 	private void validateArchivedPassword(String partnerId, UserSecurityProfile userSecurityProfile) {
 		if (passwordHistoryChecksAllowed) {
 			List<ArchivedPassword> archivedPasswords = archivedPasswordService.retrieveArchivedPassword(partnerId,

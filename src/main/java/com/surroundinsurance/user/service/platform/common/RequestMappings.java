@@ -30,6 +30,12 @@ public interface RequestMappings {
 	
 	public static String VERIFICATION_RESEND = "/verification/resend";
 	
+	public static String ONE_TIME_PASSWORD = "/onetimepassword";
+	
+	public static String ONE_TIME_PASSWORD_VERIFICATION = "/onetimepassword/verification/{code}";
+	
+	public static String CREATE_PASSWORD = "/createpassword";
+	
 	public static String AUTHENTICATE_USER = "/auth";
 	
 	public static String VERIFY_USER_AUTHENTICATION_TOKEN = "/auth/token";

@@ -37,6 +37,10 @@ public interface VerificationStrategy {
 	 * @param verificationCode the verification code
 	 */
 	public void expireVerificationCode(VerificationCode verificationCode);
+	
+	public VerificationCode createOneTimePassword(String partnerId, UserType userType, User user, String eventName);
+	
+	public VerificationCode validateOneTimePasswordVerificationCode(String partnerId, String code);
 
 	
 }

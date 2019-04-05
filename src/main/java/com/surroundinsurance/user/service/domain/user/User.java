@@ -318,6 +318,10 @@ public class User {
 	public void markAsVerified() {
 		userStatus = UserStatus.VERIFIED;
 	}
+	
+	public boolean isVerified() {
+		return UserStatus.VERIFIED.equals(userStatus);
+	}
 
 	/**
 	 * Checks if is guest user.
