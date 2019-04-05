@@ -35,13 +35,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.surroundinsurance.user.service.application.UserManagementApplicationService;
+import com.surroundinsurance.user.service.controller.dto.CreatePasswordRQ;
+import com.surroundinsurance.user.service.controller.dto.ForgotPasswordRQ;
+import com.surroundinsurance.user.service.controller.dto.ForgotPasswordVerificationCode;
+import com.surroundinsurance.user.service.controller.dto.OneTimePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ResendVerificationRQ;
+import com.surroundinsurance.user.service.controller.dto.ResetPasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.RetrieveEmailRQ;
 import com.surroundinsurance.user.service.controller.dto.UpdatePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.UpdateUserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserProfileRS;
 import com.surroundinsurance.user.service.controller.dto.UserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserRS;
+import com.surroundinsurance.user.service.controller.dto.UserVerificationCode;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.exception.AccessDeniedException;
 import com.surroundinsurance.user.service.domain.user.exception.PartnerInvalidException;
@@ -226,13 +232,65 @@ public class UserManagementController extends HTTPResponseHandler {
     	@ApiResponse(code = HTTP_STATUS_SUCCESS_STATUS_CODE, message = HTTP_STATUS_SUCCESS_STATUS_DESCRIPTION),
         @ApiResponse(code = HTTP_STATUS_BAD_REQUEST_STATUS_CODE, message = HTTP_STATUS_BAD_REQUEST_STATUS_DESCRIPTION)})
 	@RequestMapping(value = RequestMappings.VERIFICATION_RESEND, method = RequestMethod.POST)
-	public void resendVerification(HttpServletRequest request, HttpServletResponse response, @RequestBody ResendVerificationRQ resendVerificationRQ) {
+	public @ResponseBody UserVerificationCode resendVerification(HttpServletRequest request, HttpServletResponse response, @RequestBody ResendVerificationRQ resendVerificationRQ) {
 	    String partnerId = request.getHeader(PARTNER_ID_HEADER);
-		userManagementApplicationService.resendVerification(partnerId, resendVerificationRQ);
+	    
+	    UserVerificationCode userVerificationCode = userManagementApplicationService.resendVerification(partnerId, resendVerificationRQ);
+		setStatusHeadersToSuccess(response);
 		
+		return userVerificationCode;
+	}
+	
+	@ApiOperation(httpMethod = HTTP_METHOD_POST, value = "Send one time password", nickname = "Send one time password")
+	@ApiImplicitParams({
+        @ApiImplicitParam(name = PARTNER_ID_HEADER, value = PARTNER_ID_DESCRIPTION, dataType = PARTNER_ID_DATATYPE, paramType = PARTNER_ID_PARAMTYPE, required = true)})
+	@ApiResponses(value = {
+			@ApiResponse(code = HTTP_STATUS_SUCCESS_STATUS_CODE, message = HTTP_STATUS_SUCCESS_STATUS_DESCRIPTION),
+			@ApiResponse(code = HTTP_STATUS_BAD_REQUEST_STATUS_CODE, message = HTTP_STATUS_BAD_REQUEST_STATUS_DESCRIPTION) })
+	@RequestMapping(value = RequestMappings.ONE_TIME_PASSWORD, method = RequestMethod.POST)
+    public @ResponseBody UserVerificationCode sendOneTimePassword(HttpServletRequest request, HttpServletResponse response,
+            @RequestBody OneTimePasswordRQ oneTimePasswordRQ) {
+        String partnerId = request.getHeader(PARTNER_ID_HEADER);
+        UserVerificationCode userVerificationCode = userManagementApplicationService.sendOneTimePassword(partnerId, oneTimePasswordRQ);
+        setStatusHeadersToSuccess(response);
+        
+        return userVerificationCode;
+    }
+	
+	@ApiOperation(httpMethod = HTTP_METHOD_GET, value = "Verify one time password code", nickname = "Verify one time password code")
+	@ApiImplicitParams({
+        @ApiImplicitParam(name = PARTNER_ID_HEADER, value = PARTNER_ID_DESCRIPTION, dataType = PARTNER_ID_DATATYPE, paramType = PARTNER_ID_PARAMTYPE, required = true)})
+	@ApiResponses(value = {
+			@ApiResponse(code = HTTP_STATUS_SUCCESS_STATUS_CODE, message = HTTP_STATUS_SUCCESS_STATUS_DESCRIPTION, response = ForgotPasswordVerificationCode.class),
+			@ApiResponse(code = HTTP_STATUS_BAD_REQUEST_STATUS_CODE, message = HTTP_STATUS_BAD_REQUEST_STATUS_DESCRIPTION) })
+	@RequestMapping(value = RequestMappings.ONE_TIME_PASSWORD_VERIFICATION, method = RequestMethod.GET)
+    public @ResponseBody UserVerificationCode verifyOneTimePasswordCode(HttpServletRequest request,
+            HttpServletResponse response, @PathVariable String code) {
+	    String partnerId = request.getHeader(PARTNER_ID_HEADER);
+	    UserVerificationCode userVerificationCode = userManagementApplicationService.verifyOneTimemPasswordCode(partnerId, code);
+		setStatusHeadersToSuccess(response);
+		return userVerificationCode;
+	}
+	
+	@ApiOperation(httpMethod = HTTP_METHOD_POST, value = "Reset password", nickname = "Reset password")
+	@ApiImplicitParams({
+        @ApiImplicitParam(name = PARTNER_ID_HEADER, value = PARTNER_ID_DESCRIPTION, dataType = PARTNER_ID_DATATYPE, paramType = PARTNER_ID_PARAMTYPE, required = true)})
+	@ApiResponses(value = {
+			@ApiResponse(code = HTTP_STATUS_SUCCESS_STATUS_CODE, message = HTTP_STATUS_SUCCESS_STATUS_DESCRIPTION),
+			@ApiResponse(code = HTTP_STATUS_BAD_REQUEST_STATUS_CODE, message = HTTP_STATUS_BAD_REQUEST_STATUS_DESCRIPTION) })
+	@RequestMapping(value = RequestMappings.CREATE_PASSWORD, method = RequestMethod.POST)
+    public void createPassword(HttpServletRequest request, HttpServletResponse response,
+            @RequestBody CreatePasswordRQ createPasswordRQ) {
+	    String partnerId = request.getHeader(PARTNER_ID_HEADER);
+		userManagementApplicationService.createPassword(partnerId, createPasswordRQ);
 		setStatusHeadersToSuccess(response);
 		
 	}
+	
+	//TODO
+	
+	//1. verify one time password
+	//2. create password
 	
 	/**
 	 * Handle illegal argument exception.

@@ -85,6 +85,10 @@ public interface UserPersistanceAndRetrievalStrategy {
 	 * @param userSecurityProfile the user security profile
 	 */
 	void resetPassword(UserSecurityProfile userSecurityProfile);
+	
+	void createPassword(User user, UserSecurityProfile userSecurityProfile);
+	
+	void isUserSecurityProfileExists(String partnerId, String userId);
 
     /**
      * Creates the user with external user id.

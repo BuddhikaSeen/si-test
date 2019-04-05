@@ -127,9 +127,9 @@ public class DtoToDomainTransformer {
 
 	}
 
-	public static UserSecurityProfile transformUserSecurityProfileDtoToDomain(String partnerId, UserRQ userRQ) {
+	public static UserSecurityProfile transformUserSecurityProfileDtoToDomain(String partnerId, CreatePasswordRQ createPasswordRQ) {
 
-		UserSecurityProfile UserSecurityProfile = new UserSecurityProfile(partnerId, userRQ.getPassword());
+		UserSecurityProfile UserSecurityProfile = new UserSecurityProfile(partnerId, createPasswordRQ.getPassword());
 		return UserSecurityProfile;
 	}
 }
