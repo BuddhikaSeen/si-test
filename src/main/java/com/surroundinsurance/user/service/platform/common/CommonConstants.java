@@ -45,6 +45,8 @@ public interface CommonConstants {
 	
 	public static String CREATE_PASSWORD_URL = "CREATE_PASSWORD_URL";
 	
+	public static String IS_VERIFIED = "IS_VERIFIED";
+	
 	public static String DATE_SEPERATOR = "-";
 	
 	public static final String CREATED_DATE = "createdDate";

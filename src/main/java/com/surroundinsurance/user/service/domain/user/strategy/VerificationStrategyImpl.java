@@ -222,6 +222,7 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		eventMap.put(CommonConstants.EMAIL, user.getEmail());
 		eventMap.put(CommonConstants.VERIFICATION_URL, verificationUrl);
 		eventMap.put(CommonConstants.CREATE_PASSWORD_URL, oneTimePasswordUrl);
+		eventMap.put(CommonConstants.IS_VERIFIED, String.valueOf(user.isVerified()));
 
 		return eventMap;
 	}
