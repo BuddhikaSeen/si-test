@@ -16,11 +16,13 @@ import com.surroundinsurance.user.service.domain.user.UserManagementService;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationChannelType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
+import com.surroundinsurance.user.service.domain.user.VerificationCodeDetails;
 import com.surroundinsurance.user.service.domain.user.VerificationCodeGenerationType;
 import com.surroundinsurance.user.service.domain.user.VerificationService;
 import com.surroundinsurance.user.service.domain.user.VerificationStatus;
 import com.surroundinsurance.user.service.domain.user.VerificationType;
 import com.surroundinsurance.user.service.domain.user.exception.VerificationCodeExpiredException;
+import com.surroundinsurance.user.service.infrastructure.service.EmailNotificationGatewayService;
 import com.surroundinsurance.user.service.infrastructure.service.EventPublisherGatewayService;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
 
@@ -46,6 +48,9 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	@Autowired
 	private VerificationCodeGenerationStrategyImpl verificationCodeGenerationStrategy;
 	
+	@Autowired
+	private EmailNotificationGatewayService emailNotificationGatewayService;
+	
 	/** The event management service. */
 	@Autowired
 	private EventPublisherGatewayService eventPublisherGatewayService;
@@ -57,6 +62,9 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	/** The email verification url. */
 	@Value("${user.service.user.email.verification.url}")
 	private String emailVerificationUrl;
+	
+	@Value("${user.service.user.email.onetime.password.url}")
+	private String emailOneTimePasswordUrl;
 	
 	/** The verification code generation type. */
 	@Value("${user.service.user.verification.code.generation.type:UUID_GENERATION}")
@@ -73,26 +81,34 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	private int oneTimePasswordVerificationCodeExpireTime;
 		
 	@Override
-	public VerificationCode createVerificationCode(String partnerId, UserType userType, User user, String eventName) {
-
+	public VerificationCodeDetails createVerificationCode(String partnerId, UserType userType, User user, String eventName) {
+		// Creating verification code
 		String code = verificationCodeGenerationStrategy.generateVerificationCode(VerificationCodeGenerationType.valueOf(verificationCodeGenerationType));
-		
 		VerificationCode verificationCode = new VerificationCode(user.getId(), partnerId, code,
 				VerificationType.VERIFICATION, VerificationChannelType.valueOf(verificationChannelType));
 		verificationCode = verificationService.createVerificationCode(verificationCode);
+		
+		// Creating one time password
+		String password = verificationCodeGenerationStrategy.generateVerificationCode(VerificationCodeGenerationType.valueOf(verificationCodeGenerationType));
+		VerificationCode oneTimePassword = new VerificationCode(user.getId(), partnerId, password,
+				VerificationType.ONE_TIME_PASSWORD, VerificationChannelType.valueOf(verificationChannelType));
+		oneTimePassword = verificationService.createVerificationCode(oneTimePassword);
 
 		String verificationUrl = emailVerificationUrl + verificationCode.getCode();
+		String oneTimePasswordUrl = emailOneTimePasswordUrl + oneTimePassword.getCode();
 		
 		if (emailNotificationEnabled) {
 			Map<String, String> notificationEventParams = constructVerificationEventDetails(partnerId, user, userType,
-					verificationUrl, eventName);
+					verificationUrl, oneTimePasswordUrl, eventName);
 
-			eventPublisherGatewayService.publishEvent(notificationEventParams);
+//			eventPublisherGatewayService.publishEvent(notificationEventParams);
+			emailNotificationGatewayService.sendEmail(partnerId, notificationEventParams);
 		}
 
 		logger.debug("Email verification url : " + verificationUrl);
+		logger.debug("Email one time password url : " + oneTimePasswordUrl);
 		
-		return verificationCode;
+		return new VerificationCodeDetails(verificationCode, oneTimePassword);
 	}
 	
 	@Override
@@ -193,15 +209,19 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	 * @return the map
 	 */
 	private Map<String, String> constructVerificationEventDetails(String partnerId, User user, UserType userType,
-			String verificationUrl, String eventName) {
+			String verificationUrl, String oneTimePasswordUrl, String eventName) {
 		Map<String, String> eventMap = new HashMap<String, String>();
-		eventMap.put(CommonConstants.PARTNER_ID, partnerId);
-		eventMap.put(CommonConstants.USER_ID, user.getId());
+//		eventMap.put(CommonConstants.PARTNER_ID, partnerId);
+//		eventMap.put(CommonConstants.USER_ID, user.getId());
+//		eventMap.put(CommonConstants.EMAIL, user.getEmail());
+//		eventMap.put(CommonConstants.FIRST_NAME, user.getUserProfile().getFirstName());
+//		eventMap.put(CommonConstants.LAST_NAME, user.getUserProfile().getLastName());
+//		eventMap.put(CommonConstants.VERIFICATION_URL, verificationUrl);
+//		eventMap.put(CommonConstants.PLATFORM_EVENT_NAME, eventName);
+		
 		eventMap.put(CommonConstants.EMAIL, user.getEmail());
-		eventMap.put(CommonConstants.FIRST_NAME, user.getUserProfile().getFirstName());
-		eventMap.put(CommonConstants.LAST_NAME, user.getUserProfile().getLastName());
 		eventMap.put(CommonConstants.VERIFICATION_URL, verificationUrl);
-		eventMap.put(CommonConstants.PLATFORM_EVENT_NAME, eventName);
+		eventMap.put(CommonConstants.CREATE_PASSWORD_URL, oneTimePasswordUrl);
 
 		return eventMap;
 	}

@@ -33,6 +33,7 @@ import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 import com.surroundinsurance.user.service.domain.user.UserStatus;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
+import com.surroundinsurance.user.service.domain.user.VerificationCodeDetails;
 import com.surroundinsurance.user.service.domain.user.strategy.CredentialRecoveryStrategy;
 import com.surroundinsurance.user.service.domain.user.strategy.UnsupportedUserPersistanceAndRetrievalStrategy;
 import com.surroundinsurance.user.service.domain.user.strategy.UserAuthenticationStrategy;
@@ -98,7 +99,7 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 			boolean isVerified = UserStatus.PENDING_VERIFICATION.equals(userDetails.getUser().getUserStatus()) ? false : true;
 			
 			userRS = new UserRS(userDetails.getUser().getId(), UserStateType.IN_STATE, 
-					userDetails.isNewUser(), isVerified, userDetails.getVerificationCode());
+					userDetails.isNewUser(), isVerified, userDetails.getVerificationCode(), userDetails.getOneTimePassword());
 		} else {
 			UnsupportedUser unsupportedUser = DtoToDomainTransformer.transformUserDtoToUnsupportedUser(partnerId, userRQ);
 			unsupportedUser = unsupportedUserPersistanceAndRetrievalStrategy.createUnsupportedUser(unsupportedUser);
@@ -230,9 +231,9 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 		userRequestValidator.validateEmail(resendVerificationRQ.getEmail());
 		
 		User user = userPersistanceAndRetrievalStrategy.retrieveUserByEmail(partnerId, resendVerificationRQ.getEmail());
-		VerificationCode verificationCode = verificationStrategy.createVerificationCode(partnerId, user.getUserType(), user, userVerificationResentEventName);
+		VerificationCodeDetails verificationCodeDetails = verificationStrategy.createVerificationCode(partnerId, user.getUserType(), user, userVerificationResentEventName);
 		
-		return new UserVerificationCode(verificationCode.getCode());
+		return new UserVerificationCode(verificationCodeDetails.getVerificationCode().getCode(), verificationCodeDetails.getOneTimePassword().getCode());
 	}
 
 	@Override

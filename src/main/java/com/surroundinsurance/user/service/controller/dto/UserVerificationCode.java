@@ -2,17 +2,27 @@ package com.surroundinsurance.user.service.controller.dto;
 
 public class UserVerificationCode {
 
-	private String code;
+	private String verficationCode;
+	
+	private String oneTimePassword;
 
-	public UserVerificationCode(String code) {
+	public UserVerificationCode(String verficationCode, String oneTimePassword) {
 		super();
-		this.code = code;
+		this.verficationCode = verficationCode;
+		this.oneTimePassword = oneTimePassword;
 	}
 
-	public String getCode() {
-		return code;
+	public UserVerificationCode(String verficationCode) {
+		super();
+		this.verficationCode = verficationCode;
 	}
-	
-	
+
+	public String getVerficationCode() {
+		return verficationCode;
+	}
+
+	public String getOneTimePassword() {
+		return oneTimePassword;
+	}
 	
 }
