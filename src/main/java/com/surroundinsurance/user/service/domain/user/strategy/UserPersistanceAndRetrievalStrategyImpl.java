@@ -24,6 +24,7 @@ import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfileService;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
+import com.surroundinsurance.user.service.domain.user.VerificationCodeDetails;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
 
 /**
@@ -117,8 +118,8 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 //			archivedPasswordService.createArchivedPassword(passwordHistory);
 
 			if (verificationEnabled) {
-				VerificationCode verificationCode = verificationStrategy.createVerificationCode(user.getPartnerId(), user.getUserType(), user, userCreatedEventName);
-				userDetails = new UserDetails(user, true, verificationCode.getCode());
+				VerificationCodeDetails verificationCodeDetails = verificationStrategy.createVerificationCode(user.getPartnerId(), user.getUserType(), user, userCreatedEventName);
+				userDetails = new UserDetails(user, true, verificationCodeDetails.getVerificationCode().getCode(), verificationCodeDetails.getOneTimePassword().getCode());
 			} else {
 				userDetails = new UserDetails(user, true);
 			}

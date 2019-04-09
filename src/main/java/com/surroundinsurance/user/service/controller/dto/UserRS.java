@@ -18,6 +18,8 @@ public class UserRS {
 	private boolean verified;
 	
 	private String verificationCode;
+	
+	private String oneTimePassword;
 
 	/**
 	 * Instantiates a new user rs.
@@ -48,13 +50,15 @@ public class UserRS {
 		this.userStateType = userStateType;
 	}
 
-	public UserRS(String id, UserStateType userStateType, boolean newUser, boolean verified, String verificationCode) {
+	public UserRS(String id, UserStateType userStateType, boolean newUser, boolean verified, String verificationCode,
+			String oneTimePassword) {
 		super();
 		this.id = id;
 		this.userStateType = userStateType;
 		this.newUser = newUser;
 		this.verified = verified;
 		this.verificationCode = verificationCode;
+		this.oneTimePassword = oneTimePassword;
 	}
 
 	/**
@@ -85,6 +89,10 @@ public class UserRS {
 
 	public String getVerificationCode() {
 		return verificationCode;
+	}
+
+	public String getOneTimePassword() {
+		return oneTimePassword;
 	}
 
 }

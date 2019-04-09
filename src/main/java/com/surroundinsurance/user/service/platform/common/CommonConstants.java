@@ -43,6 +43,8 @@ public interface CommonConstants {
 	
 	public static String FORGOT_PASSWORD_URL = "FORGOT_PASSWORD_URL";
 	
+	public static String CREATE_PASSWORD_URL = "CREATE_PASSWORD_URL";
+	
 	public static String DATE_SEPERATOR = "-";
 	
 	public static final String CREATED_DATE = "createdDate";

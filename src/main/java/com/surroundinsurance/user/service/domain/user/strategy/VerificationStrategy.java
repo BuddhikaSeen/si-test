@@ -3,6 +3,7 @@ package com.surroundinsurance.user.service.domain.user.strategy;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
+import com.surroundinsurance.user.service.domain.user.VerificationCodeDetails;
 
 /**
  * The Interface VerificationStrategy.
@@ -21,7 +22,7 @@ public interface VerificationStrategy {
 	 * @param eventName the event name
 	 * @return the verification code
 	 */
-	public VerificationCode createVerificationCode(String partnerId, UserType userType, User user, String eventName);
+	public VerificationCodeDetails createVerificationCode(String partnerId, UserType userType, User user, String eventName);
 	
 	/**
 	 * Verify code.
