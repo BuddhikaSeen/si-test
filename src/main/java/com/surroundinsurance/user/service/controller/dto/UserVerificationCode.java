@@ -17,7 +17,7 @@ public class UserVerificationCode {
 		this.verificationCode = verificationCode;
 	}
 
-	public String getVerficationCode() {
+	public String getVerificationCode() {
 		return verificationCode;
 	}
 
