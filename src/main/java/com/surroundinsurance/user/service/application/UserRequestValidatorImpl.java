@@ -36,6 +36,9 @@ public class UserRequestValidatorImpl implements UserRequestValidator {
 
     @Value("${user.service.user.email.regexp}")
     private String emailRegularExpression;
+    
+    @Value("${user.service.user.password.regexp}")
+    private String passwordRegularExpression;
 
     @Value("${user.service.user.password.length}")
     private int passwordLength;
@@ -185,12 +188,9 @@ public class UserRequestValidatorImpl implements UserRequestValidator {
     public void validatePassword(String password) {
 
         Assert.hasText(password, "Password is required.");
-        Assert.isTrue(password.length() >= passwordLength,
-                "Password is should be minimum of " + passwordLength + " characters.");
+        Assert.isTrue(password.matches(passwordRegularExpression), "Passwords not secure");
 
     }
-
-    
 
     private void validateEmailOnCreateUpdateUser(String email) {
         if (StringUtils.hasText(email)) {
