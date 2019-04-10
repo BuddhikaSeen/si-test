@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -29,6 +30,7 @@ public class EmailNotificationGatewayService {
 	@Value("${user.service.sendgrid.connector.url}")
 	private String sendgridConnectorUrl;
 	
+	@Async
 	public void sendEmail(String partnerId, Map<String, String> notificationEventParams) {
 		SendEmailRQ sendEmailRQ = new SendEmailRQ(PlatformEventName.USER_CREATED, notificationEventParams);
 		
@@ -43,6 +45,7 @@ public class EmailNotificationGatewayService {
             ResponseEntity<Object> p97StatusResponseEntity = this.restTemplate.exchange(builder.toUriString(),
                     HttpMethod.POST, httpEntity, Object.class);
             
+            // TODO: update error handling
             System.out.println("Body:");
             System.out.println(p97StatusResponseEntity.getBody());
             System.out.println("Headers:");
