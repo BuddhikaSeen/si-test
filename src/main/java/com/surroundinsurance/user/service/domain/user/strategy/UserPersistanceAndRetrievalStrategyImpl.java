@@ -18,6 +18,8 @@ import com.surroundinsurance.user.service.domain.user.ArchivedPasswordService;
 import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.UnsupportedUserManagementService;
 import com.surroundinsurance.user.service.domain.user.User;
+import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
+import com.surroundinsurance.user.service.domain.user.UserAuthenticationTokenService;
 import com.surroundinsurance.user.service.domain.user.UserDetails;
 import com.surroundinsurance.user.service.domain.user.UserManagementService;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
@@ -74,6 +76,12 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 	/** The partner specification retrieval strategy. */
 	@Autowired
 	private PartnerSpecificationRetrievalStrategy partnerSpecificationRetrievalStrategy;
+	
+	@Autowired
+	private AuthTokenGenerationStrategy authTokenGenerationStrategy;
+	
+	@Autowired
+	private UserAuthenticationTokenService userAuthenticationTokenService;
 	
 	@Value("${user.service.previous.password.checks.count:3}")
 	private int previousPasswordCount;
@@ -236,7 +244,7 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 	}
 	
 	@Override
-	public void createPassword(User user, UserSecurityProfile userSecurityProfile) {
+	public UserAuthenticationToken createPassword(User user, UserSecurityProfile userSecurityProfile, long authTokenTimeout) {
 		String password = userSecurityProfile.getPassword();
 		
 		String hashedPassword = cryptographyStrategy.hash(password);
@@ -252,6 +260,21 @@ public class UserPersistanceAndRetrievalStrategyImpl implements UserPersistanceA
 			user.markAsVerified();
 			userManagementService.updateUser(user);
 		}
+		
+		String token = authTokenGenerationStrategy.generateToken();
+		
+		String firstName = null;
+		String lastName = null;
+		
+		if (user.getUserProfile() != null) {
+			firstName = user.getUserProfile().getFirstName();
+			lastName = user.getUserProfile().getLastName();
+		}
+		
+		UserAuthenticationToken userAuthenticationToken = new UserAuthenticationToken(token, user.getPartnerId(), user.getId(), UserType.ENROLLED, authTokenTimeout, user.getEmail(), firstName, lastName, null);
+		userAuthenticationTokenService.saveUserAuthenticationToken(userAuthenticationToken);
+		
+		return userAuthenticationToken;
 	}
 	
 	@Override

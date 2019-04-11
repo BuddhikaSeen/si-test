@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.surroundinsurance.user.service.domain.user.AdditionalInformation;
 import com.surroundinsurance.user.service.domain.user.User;
+import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
 import com.surroundinsurance.user.service.domain.user.UserDetails;
 import com.surroundinsurance.user.service.domain.user.UserSecurityProfile;
 
@@ -86,7 +87,7 @@ public interface UserPersistanceAndRetrievalStrategy {
 	 */
 	void resetPassword(UserSecurityProfile userSecurityProfile);
 	
-	void createPassword(User user, UserSecurityProfile userSecurityProfile);
+	UserAuthenticationToken createPassword(User user, UserSecurityProfile userSecurityProfile, long authTokenTimeout);
 	
 	void isUserSecurityProfileExists(String partnerId, String userId);
 
