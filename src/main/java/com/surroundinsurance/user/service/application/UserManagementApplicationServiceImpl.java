@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.surroundinsurance.user.service.controller.dto.AuthenticationRS;
 import com.surroundinsurance.user.service.controller.dto.CreatePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.DomainToDtoTransformer;
 import com.surroundinsurance.user.service.controller.dto.DtoToDomainTransformer;
@@ -25,6 +26,7 @@ import com.surroundinsurance.user.service.controller.dto.UserRQ;
 import com.surroundinsurance.user.service.controller.dto.UserRS;
 import com.surroundinsurance.user.service.controller.dto.UserStateType;
 import com.surroundinsurance.user.service.controller.dto.UserVerificationCode;
+import com.surroundinsurance.user.service.domain.partner.strategy.PartnerSpecificationRetrievalStrategy;
 import com.surroundinsurance.user.service.domain.user.UnsupportedUser;
 import com.surroundinsurance.user.service.domain.user.User;
 import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
@@ -76,6 +78,9 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 	/** The user authentication strategy. */
 	@Autowired
 	private UserAuthenticationStrategy userAuthenticationStrategy;
+	
+	@Autowired
+    private PartnerSpecificationRetrievalStrategy partnerSpecificationRetrievalStrategy;
 	
 	/** The user verification resent event name. */
 	@Value("${user.service.user.verification.resent.event.name}")
@@ -157,12 +162,16 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 	}
 
 	@Override
-	public void verifyCode(String partnerId, String code) {
+	public AuthenticationRS verifyCode(String partnerId, String code) {
 		
 		userRequestValidator.validatePartnerId(partnerId);
 		Assert.hasText(code, "The verification code is required.");
-		verificationStrategy.verifyCode(partnerId, code);
+		
+		long authTokenTimeout = partnerSpecificationRetrievalStrategy.retrieveUserAuthenticationTokenTimeout(partnerId);
+		UserAuthenticationToken userAuthenticationToken = verificationStrategy.verifyCode(partnerId, code, authTokenTimeout);
 
+		AuthenticationRS authenticationRS = new AuthenticationRS(userAuthenticationToken.getId(), authTokenTimeout);
+		return authenticationRS;
 	}
 
 	@Override
@@ -279,7 +288,7 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 	}
 
 	@Override
-	public void createPassword(String partnerId, CreatePasswordRQ createPasswordRQ) {
+	public AuthenticationRS createPassword(String partnerId, CreatePasswordRQ createPasswordRQ) {
 		userRequestValidator.validatePartnerId(partnerId);
 		Assert.notNull(createPasswordRQ, "CreatePasswordRQ is null.");
 		Assert.hasText(createPasswordRQ.getCode(), "The one time password verification code is required.");
@@ -291,10 +300,13 @@ public class UserManagementApplicationServiceImpl implements UserManagementAppli
 		
 		User user = userPersistanceAndRetrievalStrategy.retrieveUser(verificationCode.getPartnerId(), verificationCode.getUserId(), true);
 		UserSecurityProfile userSecurityProfile = DtoToDomainTransformer.transformUserSecurityProfileDtoToDomain(partnerId, createPasswordRQ);
-				
-		userPersistanceAndRetrievalStrategy.createPassword(user, userSecurityProfile);
+		
+		long authTokenTimeout = partnerSpecificationRetrievalStrategy.retrieveUserAuthenticationTokenTimeout(partnerId);
+		UserAuthenticationToken userAuthenticationToken = userPersistanceAndRetrievalStrategy.createPassword(user, userSecurityProfile, authTokenTimeout);
 		verificationStrategy.expireVerificationCode(verificationCode);
 		
+		AuthenticationRS authenticationRS = new AuthenticationRS(userAuthenticationToken.getId(), authTokenTimeout);
+		return authenticationRS;
 	}
 	
 }

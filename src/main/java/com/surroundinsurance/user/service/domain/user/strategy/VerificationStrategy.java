@@ -1,6 +1,7 @@
 package com.surroundinsurance.user.service.domain.user.strategy;
 
 import com.surroundinsurance.user.service.domain.user.User;
+import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationCode;
 import com.surroundinsurance.user.service.domain.user.VerificationCodeDetails;
@@ -30,7 +31,7 @@ public interface VerificationStrategy {
 	 * @param partnerId the partner id
 	 * @param code the code
 	 */
-	public void verifyCode(String partnerId, String code);
+	public UserAuthenticationToken verifyCode(String partnerId, String code, long authTokenTimeout);
 	
 	/**
 	 * Expire verification code.

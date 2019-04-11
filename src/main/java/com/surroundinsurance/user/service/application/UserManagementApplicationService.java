@@ -1,5 +1,6 @@
 package com.surroundinsurance.user.service.application;
 
+import com.surroundinsurance.user.service.controller.dto.AuthenticationRS;
 import com.surroundinsurance.user.service.controller.dto.CreatePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ForgotPasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ForgotPasswordVerificationCode;
@@ -55,7 +56,7 @@ public interface UserManagementApplicationService {
 	 *
 	 * @param code the code
 	 */
-	void verifyCode(String partnerId, String code);
+	AuthenticationRS verifyCode(String partnerId, String code);
 
 	/**
 	 * Update password.
@@ -111,6 +112,6 @@ public interface UserManagementApplicationService {
 	
 	UserVerificationCode verifyOneTimemPasswordCode(String partnerId, String code);
 	
-	void createPassword(String partnerId, CreatePasswordRQ resetPasswordRQ);
+	AuthenticationRS createPassword(String partnerId, CreatePasswordRQ resetPasswordRQ);
 
 }

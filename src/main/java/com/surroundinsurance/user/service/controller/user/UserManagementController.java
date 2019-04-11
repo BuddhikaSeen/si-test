@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.surroundinsurance.user.service.application.UserManagementApplicationService;
+import com.surroundinsurance.user.service.controller.dto.AuthenticationRS;
 import com.surroundinsurance.user.service.controller.dto.CreatePasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ForgotPasswordRQ;
 import com.surroundinsurance.user.service.controller.dto.ForgotPasswordVerificationCode;
@@ -162,12 +163,12 @@ public class UserManagementController extends HTTPResponseHandler {
     	@ApiResponse(code = HTTP_STATUS_SUCCESS_STATUS_CODE, message = HTTP_STATUS_SUCCESS_STATUS_DESCRIPTION),
         @ApiResponse(code = HTTP_STATUS_BAD_REQUEST_STATUS_CODE, message = HTTP_STATUS_BAD_REQUEST_STATUS_DESCRIPTION)})
 	@RequestMapping(value = RequestMappings.VERIFICATION, method = RequestMethod.GET)
-	public void verification(HttpServletRequest request, HttpServletResponse response, @PathVariable String code) {
+	public @ResponseBody AuthenticationRS verification(HttpServletRequest request, HttpServletResponse response, @PathVariable String code) {
 	    String partnerId = request.getHeader(PARTNER_ID_HEADER);
-		userManagementApplicationService.verifyCode(partnerId, code);
-		
+	    AuthenticationRS authenticationRS = userManagementApplicationService.verifyCode(partnerId, code);
 		setStatusHeadersToSuccess(response);
 		
+		return authenticationRS;
 	}
 		
 	/**
@@ -279,18 +280,14 @@ public class UserManagementController extends HTTPResponseHandler {
 			@ApiResponse(code = HTTP_STATUS_SUCCESS_STATUS_CODE, message = HTTP_STATUS_SUCCESS_STATUS_DESCRIPTION),
 			@ApiResponse(code = HTTP_STATUS_BAD_REQUEST_STATUS_CODE, message = HTTP_STATUS_BAD_REQUEST_STATUS_DESCRIPTION) })
 	@RequestMapping(value = RequestMappings.CREATE_PASSWORD, method = RequestMethod.POST)
-    public void createPassword(HttpServletRequest request, HttpServletResponse response,
+    public @ResponseBody AuthenticationRS createPassword(HttpServletRequest request, HttpServletResponse response,
             @RequestBody CreatePasswordRQ createPasswordRQ) {
 	    String partnerId = request.getHeader(PARTNER_ID_HEADER);
-		userManagementApplicationService.createPassword(partnerId, createPasswordRQ);
+	    AuthenticationRS authenticationRS = userManagementApplicationService.createPassword(partnerId, createPasswordRQ);
 		setStatusHeadersToSuccess(response);
 		
+		return authenticationRS;
 	}
-	
-	//TODO
-	
-	//1. verify one time password
-	//2. create password
 	
 	/**
 	 * Handle illegal argument exception.

@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.surroundinsurance.user.service.domain.partner.strategy.PartnerSpecificationRetrievalStrategy;
 import com.surroundinsurance.user.service.domain.user.User;
+import com.surroundinsurance.user.service.domain.user.UserAuthenticationToken;
+import com.surroundinsurance.user.service.domain.user.UserAuthenticationTokenService;
 import com.surroundinsurance.user.service.domain.user.UserManagementService;
 import com.surroundinsurance.user.service.domain.user.UserType;
 import com.surroundinsurance.user.service.domain.user.VerificationChannelType;
@@ -54,6 +57,12 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	/** The event management service. */
 	@Autowired
 	private EventPublisherGatewayService eventPublisherGatewayService;
+	
+	@Autowired
+	private AuthTokenGenerationStrategy authTokenGenerationStrategy;
+	
+	@Autowired
+	private UserAuthenticationTokenService userAuthenticationTokenService;
 	
 	/** The email notification enabled. */
 	@Value("${user.service.user.email.notification.enabled}")
@@ -147,7 +156,7 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 	}
 		
 	@Override
-	public void verifyCode(String partnerId, String code) {
+	public UserAuthenticationToken verifyCode(String partnerId, String code, long authTokenTimeout) {
 		
 		VerificationCode verificationCode = verificationService.retrieveVerificationCode(partnerId, code, VerificationType.VERIFICATION);
 		
@@ -163,6 +172,21 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 		userManagementService.updateUser(user);
 		
 		expireVerificationCode(verificationCode);
+		
+		String token = authTokenGenerationStrategy.generateToken();
+		
+		String firstName = null;
+		String lastName = null;
+		
+		if (user.getUserProfile() != null) {
+			firstName = user.getUserProfile().getFirstName();
+			lastName = user.getUserProfile().getLastName();
+		}
+		
+		UserAuthenticationToken userAuthenticationToken = new UserAuthenticationToken(token, partnerId, user.getId(), UserType.ENROLLED, authTokenTimeout, user.getEmail(), firstName, lastName, null);
+		userAuthenticationTokenService.saveUserAuthenticationToken(userAuthenticationToken);
+		
+		return userAuthenticationToken;
 	}
 	
 	private void validateVerificationCodeExpiry(VerificationCode verificationCode) {
