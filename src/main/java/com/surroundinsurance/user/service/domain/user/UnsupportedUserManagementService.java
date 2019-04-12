@@ -6,6 +6,6 @@ public interface UnsupportedUserManagementService {
 	
 	UnsupportedUser updateUnsupportedUser(UnsupportedUser unsupportedUser);
 	
-	UnsupportedUser retrieveUserByEmail(String partnerId, String email);
+	UnsupportedUser retrieveUserByEmailAndState(String email, String state, String partnerId);
 
 }

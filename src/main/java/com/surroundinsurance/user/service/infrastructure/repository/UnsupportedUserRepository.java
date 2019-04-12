@@ -9,6 +9,6 @@ import com.surroundinsurance.user.service.domain.user.User;
 @Repository
 public interface UnsupportedUserRepository extends MongoRepository<UnsupportedUser, String> {
 
-	public UnsupportedUser findByEmailAndPartnerId(String email, String partnerId);
+	public UnsupportedUser findByEmailAndStateAndPartnerId(String email, String state, String partnerId);
 	
 }

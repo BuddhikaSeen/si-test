@@ -13,9 +13,9 @@ public class UnsupportedUserValidationStrategyImpl implements UnsupportedUserVal
 	private UnsupportedUserManagementService unsupportedUserManagementService;
 
 	@Override
-	public UnsupportedUser validateEmail(String email, String partnerId) {
+	public UnsupportedUser validateEmail(String email, String state, String partnerId) {
 
-		UnsupportedUser existingUnsupportedUser = unsupportedUserManagementService.retrieveUserByEmail(partnerId, email);
+		UnsupportedUser existingUnsupportedUser = unsupportedUserManagementService.retrieveUserByEmailAndState(email, state, partnerId);
 		
 		return existingUnsupportedUser;
 

@@ -38,8 +38,8 @@ public class UnsupportedUserManagementServiceImpl implements UnsupportedUserMana
 	}
 	
 	@Override
-	public UnsupportedUser retrieveUserByEmail(String partnerId, String email) {
-		return unsupportedUserRepository.findByEmailAndPartnerId(email.toLowerCase(), partnerId);
+	public UnsupportedUser retrieveUserByEmailAndState(String email, String state, String partnerId) {
+		return unsupportedUserRepository.findByEmailAndStateAndPartnerId(email.toLowerCase(), state, partnerId);
 	}
 
 }

@@ -21,15 +21,12 @@ public class UnsupportedUserPersistanceAndRetrievalStrategyImpl implements Unsup
 	
 	@Override
 	public UnsupportedUser createUnsupportedUser(UnsupportedUser unsupportedUser) {
-		UnsupportedUser existingUnsupportedUser = unsupportedUserValidationStrategy.validateEmail(unsupportedUser.getEmail(), unsupportedUser.getPartnerId());
+		UnsupportedUser existingUnsupportedUser = unsupportedUserValidationStrategy.validateEmail(unsupportedUser.getEmail(), 
+				unsupportedUser.getState(), unsupportedUser.getPartnerId());
 
 		if (existingUnsupportedUser == null) {
 			unsupportedUser = unsupportedUserManagementService.createUnsupportedUser(unsupportedUser);
 		} else {
-			if(!existingUnsupportedUser.getState().equals(unsupportedUser.getState())) {
-				existingUnsupportedUser.setState(unsupportedUser.getState());
-			}
-			
 			unsupportedUser = unsupportedUserManagementService.updateUnsupportedUser(existingUnsupportedUser);
 		}
 
