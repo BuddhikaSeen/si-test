@@ -4,6 +4,8 @@ import static com.surroundinsurance.user.service.platform.common.CommonConstants
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,14 +16,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.surroundinsurance.user.service.controller.dto.SendEmailRQ;
+import com.surroundinsurance.user.service.platform.common.InternalErrorException;
 import com.surroundinsurance.user.service.platform.common.PlatformEventName;
+import com.surroundinsurance.user.service.platform.common.SurroundInsuranceExceptionCodes;
 
 @Component
 public class EmailNotificationGatewayService {
+	
+	private Logger logger = LoggerFactory.getLogger(EmailNotificationGatewayService.class);
 		
 	@Autowired
     @Qualifier("restTemplate")
@@ -44,15 +53,25 @@ public class EmailNotificationGatewayService {
 
             ResponseEntity<Object> p97StatusResponseEntity = this.restTemplate.exchange(builder.toUriString(),
                     HttpMethod.POST, httpEntity, Object.class);
-            
-            // TODO: update error handling
-            System.out.println("Body:");
-            System.out.println(p97StatusResponseEntity.getBody());
-            System.out.println("Headers:");
-            System.out.println(p97StatusResponseEntity.getHeaders());
-		} catch (Exception e) {
-			System.out.println("Error!");
-			System.out.println(e);
+		} catch (HttpServerErrorException e) {
+            logger.error("HttpServerErrorException occurred while connecting to the email connector", e);
+            throw new InternalErrorException(SurroundInsuranceExceptionCodes.INTERNAL_SERVER_ERROR.toString(),
+            		SurroundInsuranceExceptionCodes.INTERNAL_SERVER_ERROR.getDescription());
+
+        } catch (HttpClientErrorException e) {
+            logger.error("HttpClientErrorException occurred while connecting to the email connector", e);
+            throw new InternalErrorException(SurroundInsuranceExceptionCodes.BAD_REQUEST.toString(),
+            		SurroundInsuranceExceptionCodes.BAD_REQUEST.getDescription());
+
+        } catch (ResourceAccessException e) {
+            logger.error("ResourceAccessException occurred while connecting to the email connector", e);
+            throw new InternalErrorException(SurroundInsuranceExceptionCodes.BAD_GATEWAY.toString(),
+            		SurroundInsuranceExceptionCodes.BAD_GATEWAY.getDescription());
+
+        } catch (Exception e) {
+        	logger.error("Exception occurred while connecting to the email connector", e);
+            throw new InternalErrorException(SurroundInsuranceExceptionCodes.INTERNAL_SERVER_ERROR.toString(),
+            		SurroundInsuranceExceptionCodes.INTERNAL_SERVER_ERROR.getDescription());
 		}
 	}
 	
