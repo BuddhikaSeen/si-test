@@ -19,8 +19,10 @@ import com.surroundinsurance.user.service.domain.user.VerificationService;
 import com.surroundinsurance.user.service.domain.user.VerificationStatus;
 import com.surroundinsurance.user.service.domain.user.VerificationType;
 import com.surroundinsurance.user.service.domain.user.exception.VerificationCodeExpiredException;
+import com.surroundinsurance.user.service.infrastructure.service.EmailNotificationGatewayService;
 import com.surroundinsurance.user.service.infrastructure.service.EventPublisherGatewayService;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
+import com.surroundinsurance.user.service.platform.common.PlatformEventName;
 
 /**
  * The Class CredentialRecoveryStrategyImpl.
@@ -48,6 +50,9 @@ public class CredentialRecoveryStrategyImpl implements CredentialRecoveryStrateg
 	/** The verification code generation strategy. */
 	@Autowired
 	private VerificationCodeGenerationStrategyImpl verificationCodeGenerationStrategy;
+	
+	@Autowired
+	private EmailNotificationGatewayService emailNotificationGatewayService;
 	
 	/** The email notification enabled. */
 	@Value("${user.service.user.email.notification.enabled}")
@@ -86,7 +91,8 @@ public class CredentialRecoveryStrategyImpl implements CredentialRecoveryStrateg
 			Map<String, String> forgotPasswordNotificationEventParams = constructForgotPasswordEventDetails(partnerId,
 					user, forgotPasswordVerificationUrl, userForgotPasswordEventName);
 
-			eventPublisherGatewayService.publishEvent(forgotPasswordNotificationEventParams);
+//			eventPublisherGatewayService.publishEvent(forgotPasswordNotificationEventParams);
+			emailNotificationGatewayService.sendEmail(partnerId, PlatformEventName.USER_FORGOT_PASSWORD, forgotPasswordNotificationEventParams);
 		}
 
 		logger.debug("Forgot password url : " + forgotPasswordVerificationUrl);
@@ -139,13 +145,9 @@ public class CredentialRecoveryStrategyImpl implements CredentialRecoveryStrateg
 	private Map<String, String> constructForgotPasswordEventDetails(String partnerId, User user,
 			String forgotPasswordUrl, String eventName) {
 		Map<String, String> eventMap = new HashMap<String, String>();
-		eventMap.put(CommonConstants.PARTNER_ID, partnerId);
-		eventMap.put(CommonConstants.USER_ID, user.getId());
+		
 		eventMap.put(CommonConstants.EMAIL, user.getEmail());
-		eventMap.put(CommonConstants.FIRST_NAME, user.getUserProfile().getFirstName());
-		eventMap.put(CommonConstants.LAST_NAME, user.getUserProfile().getLastName());
-		eventMap.put(CommonConstants.VERIFICATION_URL, forgotPasswordUrl);
-		eventMap.put(CommonConstants.PLATFORM_EVENT_NAME, eventName);
+		eventMap.put(CommonConstants.FORGOT_PASSWORD_URL, forgotPasswordUrl);
 
 		return eventMap;
 	}

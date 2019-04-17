@@ -28,6 +28,7 @@ import com.surroundinsurance.user.service.domain.user.exception.VerificationCode
 import com.surroundinsurance.user.service.infrastructure.service.EmailNotificationGatewayService;
 import com.surroundinsurance.user.service.infrastructure.service.EventPublisherGatewayService;
 import com.surroundinsurance.user.service.platform.common.CommonConstants;
+import com.surroundinsurance.user.service.platform.common.PlatformEventName;
 
 /**
  * The Class VerificationStrategyImpl.
@@ -111,7 +112,7 @@ public class VerificationStrategyImpl implements VerificationStrategy {
 					verificationUrl, oneTimePasswordUrl, eventName);
 
 //			eventPublisherGatewayService.publishEvent(notificationEventParams);
-			emailNotificationGatewayService.sendEmail(partnerId, notificationEventParams);
+			emailNotificationGatewayService.sendEmail(partnerId, PlatformEventName.USER_CREATED, notificationEventParams);
 		}
 
 		logger.debug("Email verification url : " + verificationUrl);

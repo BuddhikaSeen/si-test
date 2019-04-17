@@ -40,8 +40,8 @@ public class EmailNotificationGatewayService {
 	private String sendgridConnectorUrl;
 	
 	@Async
-	public void sendEmail(String partnerId, Map<String, String> notificationEventParams) {
-		SendEmailRQ sendEmailRQ = new SendEmailRQ(PlatformEventName.USER_CREATED, notificationEventParams);
+	public void sendEmail(String partnerId, PlatformEventName platformEventName, Map<String, String> notificationEventParams) {
+		SendEmailRQ sendEmailRQ = new SendEmailRQ(platformEventName, notificationEventParams);
 		
 		try {
             UriComponentsBuilder builder = UriComponentsBuilder
